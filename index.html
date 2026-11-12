@@ -595,14 +595,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   margin:12px 0 2px;font-size:12.5px;line-height:1.55;background:#f8fbfb}
 .aa-consulta b{color:var(--petroleo)}
 .aa-acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-#aaCards .card{cursor:pointer;position:relative;
-  transition:transform .12s ease,box-shadow .12s ease}
-#aaCards .card:hover{transform:translateY(-2px);
-  box-shadow:0 8px 22px rgba(38,77,85,.20)}
-#aaCards .card .ver{display:block;margin-top:8px;font-size:11px;
-  font-weight:700;color:var(--cinza)}
-#aaCards .card:hover .ver{color:var(--petroleo)}
-.aa-meses td.atual{font-weight:700;color:var(--petroleo)}
 #aaBarra{margin:4px 0 2px}
 @media(max-width:760px){
   #aatab th:nth-child(2),#aatab td:nth-child(2){display:none}
@@ -1091,7 +1083,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   };
   var MESES = null, FORN = null, MM = {};
   var filtroSt = 'todos', busca = '', mi = 0, over = {}, atual = [];
-  var stats = null; /* números da competência corrente, para as fichas dos cards */
 
   function fB(v) {
     /* o fmtBRL do painel vive em escopo de script, não no window: o
@@ -1170,31 +1161,22 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
     });
     var pot = lib + ret, pct = pot ? lib / pot * 100 : 0;
     var deb = m3[3], liq = deb - lib;
-    stats = { comp: comp, fat: m3[1], pis: m3[2], deb: deb, lib: lib, ret: ret,
-              pot: pot, liq: liq, nLib: nLib, nRet: nRet, nCred: nCred };
 
     document.getElementById('aaCards').innerHTML =
-      '<div class="card destaque" data-card="receita"><h3>💰 Receita da competência</h3>' +
+      '<div class="card destaque"><h3>💰 Receita da competência</h3>' +
       '<div class="v">' + fB(m3[1]) + '</div>' +
-      '<div class="n">base de ' + comp + ' projetada para 2027</div>' +
-      '<span class="ver">ver cálculo ›</span></div>' +
-      '<div class="card fixo" data-card="debito"><h3>🧾 Débito de CBS (' + aliq() + ')</h3>' +
+      '<div class="n">base de ' + comp + ' projetada para 2027</div></div>' +
+      '<div class="card fixo"><h3>🧾 Débito de CBS (' + aliq() + ')</h3>' +
       '<div class="v">' + fB(deb) + '</div>' +
       '<div class="n">pré-preenchido na apuração assistida (art. 46)</div>' +
-      '<span class="tag">ESTIMATIVA</span>' +
-      '<span class="ver">ver cálculo ›</span></div>' +
-      '<div class="card sem-verde" data-card="liberado"><h3>✅ Crédito liberado</h3>' +
+      '<span class="tag">ESTIMATIVA</span></div>' +
+      '<div class="card sem-verde"><h3>✅ Crédito liberado</h3>' +
       '<div class="v">' + fB(lib) + '</div>' +
       '<div class="n">' + nLib + ' de ' + nCred +
-      ' fornecedores com o débito extinto</div>' +
-      '<span class="ver">ver cálculo ›</span></div>' +
-      '<div class="card sem-vermelho" data-card="retido"><h3>🔒 Crédito retido</h3>' +
+      ' fornecedores com o débito extinto</div></div>' +
+      '<div class="card sem-vermelho"><h3>🔒 Crédito retido</h3>' +
       '<div class="v">' + fB(ret) + '</div>' +
-      '<div class="n">' + nRet + ' guia(s) em aberto - art. 47</div>' +
-      '<span class="ver">ver cálculo ›</span></div>';
-    document.querySelectorAll('#aaCards .card').forEach(function (c) {
-      c.addEventListener('click', function () { abreCard(c.dataset.card); });
-    });
+      '<div class="n">' + nRet + ' guia(s) em aberto - art. 47</div></div>';
 
     var chips = [['todos', 'Todos'], ['pago', '🟢 Pagas'],
                  ['split', '🔵 Split'], ['adq', '🟣 Adquirente'],
@@ -1337,124 +1319,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
       renderAA();
     });
   }
-
-  /* Fichas dos cards: cada painel abre a memória de cálculo do próprio número,
-     no mesmo overlay das guias. Tudo sai de stats e das linhas da competência
-     corrente, então bate ao centavo com o que está na tela. */
-  function fP(v, casas) {
-    return v.toLocaleString('pt-BR', { minimumFractionDigits: casas,
-      maximumFractionDigits: casas }) + '%';
-  }
-  function linF(rot, val, forte) {
-    return '<div class="lin"><span>' + rot + '</span><b>' +
-           (forte ? '<span style="font-size:15px">' + val + '</span>' : val) +
-           '</b></div>';
-  }
-  function abreCard(tipo) {
-    if (!stats) return;
-    var s = stats, titulo = '', corpo = '';
-    var pctEf = s.fat ? s.deb / s.fat * 100 : 0;
-
-    if (tipo === 'receita') {
-      var media = DEMO.m3.reduce(function (a, r) { return a + r[1]; }, 0) / DEMO.m3.length;
-      var dif = media ? (s.fat / media - 1) * 100 : 0;
-      var ativas = DEMO.m2.filter(function (c) { return c[7] === 'ATIVA'; });
-      var cart = ativas.reduce(function (a, c) { return a + (+c[4] || 0); }, 0);
-      titulo = '💰 Receita da competência - ' + s.comp;
-      corpo =
-        linF('Receita faturada em ' + s.comp, fB(s.fat), true) +
-        linF('Média das 12 competências da base', fB(media)) +
-        linF('Posição contra a média', (dif >= 0 ? '+' : '-') + fP(Math.abs(dif), 1)) +
-        linF('Carteira ativa', ativas.length + ' clientes · ' + fB(cart) + '/mês') +
-        linF('PIS/COFINS atual embutido no mês', fB(s.pis)) +
-        '<table class="dre aa-meses"><tbody>' +
-        DEMO.m3.map(function (r, i) {
-          var marca = i === mi ? ' class="atual"' : '';
-          return '<tr><td' + marca + '>📅 ' + r[0] + (i === mi ? ' ◀' : '') +
-                 '</td><td class="num' + (i === mi ? ' atual' : '') + '">' +
-                 fB(r[1]) + '</td></tr>';
-        }).join('') + '</tbody></table>' +
-        '<div class="aa-consulta">🧭 Este número não é calculado: é o <b>faturamento ' +
-        'real</b> da planilha da empresa (set/2025 a ago/2026), usado como base da ' +
-        'competência equivalente de 2027. Sobre ele aplica-se a alíquota de referência ' +
-        'para estimar o débito de CBS. Crescimento projetado se ajusta em Parâmetros.</div>';
-
-    } else if (tipo === 'debito') {
-      titulo = '🧾 Débito de CBS - ' + s.comp;
-      corpo =
-        linF('Receita da competência', fB(s.fat)) +
-        linF('× Alíquota de referência da CBS', fP(pctEf, 1)) +
-        linF('= Débito bruto pré-preenchido', fB(s.deb), true) +
-        '<table class="dre"><tbody>' +
-        '<tr><td>🧾 Débito bruto (art. 46)</td><td class="num">' + fB(s.deb) + '</td></tr>' +
-        '<tr><td>✅ Créditos de fornecedores liberados</td><td class="num">-' + fB(s.lib) + '</td></tr>' +
-        '<tr class="forte"><td>💳 CBS líquida hoje</td><td class="num">' + fB(s.liq) + '</td></tr>' +
-        '</tbody></table>' +
-        '<div class="aa-consulta">⚠️ <b>Estimativa:</b> a alíquota usada é a de ' +
-        'referência dos estudos oficiais (' + aliq().replace('*', '') + '); a oficial de ' +
-        '2027 sai por ato do Comitê Gestor e da RFB. Na apuração assistida (art. 46 da ' +
-        'LC 214/2025) o débito chega <b>pré-preenchido</b> dos documentos fiscais: o ' +
-        'papel da empresa é conferir, não calcular. A alíquota se ajusta em Parâmetros.</div>';
-
-    } else if (tipo === 'liberado') {
-      var ls = linhasDaComp().filter(function (l) {
-        return l.st !== 'nulo' && l.st !== 'aberto';
-      });
-      var mec = {
-        pago:  ['🟢 Guias pagas pelo fornecedor (art. 27, II)', 0, 0],
-        split: ['🔵 Split payment na liquidação (arts. 31 a 35)', 0, 0],
-        adq:   ['🟣 Recolhidas pelo adquirente (art. 36)', 0, 0]
-      };
-      ls.forEach(function (l) { mec[l.st][1]++; mec[l.st][2] += l.cbs; });
-      var top = ls.slice().sort(function (a, b) { return b.cbs - a.cbs; }).slice(0, 5);
-      titulo = '✅ Crédito liberado - ' + s.comp;
-      corpo =
-        ['pago', 'split', 'adq'].map(function (k) {
-          return linF(mec[k][0], mec[k][1] + ' · ' + fB(mec[k][2]));
-        }).join('') +
-        linF('Total liberado (' + s.nLib + ' fornecedores)', fB(s.lib), true) +
-        '<div class="aa-passos"><span>🏆 Maiores créditos liberados da competência</span></div>' +
-        top.map(function (l) {
-          return linF(l.f.nome, fB(l.cbs));
-        }).join('') +
-        (ls.length > top.length
-          ? '<div class="aa-passos"><span>… e mais ' + (ls.length - top.length) +
-            ' fornecedores na tabela abaixo</span></div>' : '') +
-        '<div class="aa-consulta">🧭 O crédito de CBS só nasce com o <b>débito ' +
-        'extinto</b> na ponta do fornecedor: guia paga, split payment ou recolhimento ' +
-        'pelo adquirente. É a soma dessas operações que entra na apuração da ' +
-        'competência e abate o débito bruto.</div>';
-
-    } else if (tipo === 'retido') {
-      var ab = linhasDaComp().filter(function (l) { return l.st === 'aberto'; });
-      titulo = '🔒 Crédito retido - ' + s.comp;
-      corpo =
-        (ab.length
-          ? ab.map(function (l) {
-              return linF('🔴 ' + l.f.nome, fB(l.cbs));
-            }).join('') +
-            linF('Total retido (' + s.nRet + ' guia(s) em aberto)', fB(s.ret), true)
-          : '<div class="cenario">✅ Nenhuma guia em aberto nesta competência: ' +
-            'não há crédito retido.</div>') +
-        '<table class="dre"><tbody>' +
-        '<tr><td>💳 CBS líquida hoje</td><td class="num">' + fB(s.liq) + '</td></tr>' +
-        '<tr><td>💳 CBS líquida se tudo regularizar</td><td class="num">' +
-        fB(s.deb - s.pot) + '</td></tr>' +
-        '<tr class="forte"><td>💰 Economia em jogo</td><td class="num">' + fB(s.ret) + '</td></tr>' +
-        '</tbody></table>' +
-        '<div class="aa-consulta">⚠️ Pelo <b>art. 47 da LC 214/2025</b> o crédito fica ' +
-        'retido enquanto o débito do fornecedor não for extinto. Para destravar: o ' +
-        'fornecedor regulariza a guia, ou a empresa recolhe pelo <b>art. 36</b> e paga ' +
-        'só o líquido. Toque na linha do fornecedor na tabela e simule.</div>';
-    }
-
-    document.getElementById('aaFicha').innerHTML =
-      '<div class="fh"><div>' + titulo + '</div><span id="aaX">✕</span></div>' +
-      '<div class="fb">' + corpo + '</div>';
-    document.getElementById('aaOvl').classList.add('aberto');
-    document.getElementById('aaX').addEventListener('click', fechaFicha);
-  }
-
   document.addEventListener('click', function (ev) {
     if (ev.target && ev.target.id === 'aaOvl') fechaFicha();
   });
