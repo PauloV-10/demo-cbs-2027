@@ -402,14 +402,29 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   header img.portes{height:30px;padding:5px 9px}
   header .titulo{font-size:12.5px;line-height:1.4;flex:1 1 100%;order:5}
   header .sessao{font-size:10px}
-  nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none;margin:0 -14px;padding:0 14px}
-  nav::-webkit-scrollbar{display:none}
-  nav button{white-space:nowrap;padding:10px 12px;font-size:12.5px;flex:0 0 auto}
+  /* a navegação vira grade: tudo na tela, nada desliza para o lado */
+  nav{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-bottom:10px}
+  nav button{padding:9px 6px;font-size:11.5px;line-height:1.3;border-radius:8px;
+    background:rgba(255,255,255,.08);text-align:center}
+  nav button:first-child{grid-column:1 / -1}
+  nav button.on{background:#f4f7f7}
   main{margin:14px auto;padding:0 12px}
   h2{font-size:13.5px}
-  .card .v{font-size:20px}
-  .tile{padding:14px 16px}
+  /* cartões de indicadores distribuídos em pares, não empilhados */
+  .grid,.grid4{grid-template-columns:1fr 1fr;gap:10px}
+  .card{padding:12px}
+  .card h3{font-size:10.5px;letter-spacing:.4px}
+  .card .v{font-size:17px}
+  .card .n{font-size:11px}
+  .inicio-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .tile{flex-direction:column;gap:8px;padding:12px}
+  .tile .ico{width:40px;height:40px;font-size:20px;flex:0 0 40px}
+  .tile h3{font-size:13px}
+  .tile p{display:none}
+  .tile .abrir{display:none}
+  .tile .met{font-size:11px}
+  .rel-num{min-width:0;flex:1 1 calc(50% - 6px);padding:10px 12px}
+  .rel-num .v{font-size:16px}
   .filtros>input{min-width:0;flex:1 1 160px}
   .filtros .cont{margin-left:0;flex-basis:100%}
   .msdd .panel{min-width:250px;max-width:calc(100vw - 40px)}
@@ -418,6 +433,38 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .wrap{max-height:70vh}
   table{font-size:12.5px}
   th,td{padding:6px 8px}
+  /* as tabelas dos módulos cabem na tela: ficam as colunas que contam a
+     história (quem, quanto, o efeito da CBS) e o resto mora na ficha ou no
+     DRE que abrem ao tocar na linha. Vale só para o celular. */
+  #m1tab th:nth-child(2),#m1tab td:nth-child(2),
+  #m1tab th:nth-child(4),#m1tab td:nth-child(4),
+  #m1tab th:nth-child(5),#m1tab td:nth-child(5),
+  #m1tab th:nth-child(6),#m1tab td:nth-child(6){display:none}
+  #m2tab th:nth-child(2),#m2tab td:nth-child(2),
+  #m2tab th:nth-child(3),#m2tab td:nth-child(3),
+  #m2tab th:nth-child(5),#m2tab td:nth-child(5),
+  #m2tab th:nth-child(6),#m2tab td:nth-child(6),
+  #m2tab th:nth-child(7),#m2tab td:nth-child(7),
+  #m2tab th:nth-child(8),#m2tab td:nth-child(8){display:none}
+  #m3tab th:nth-child(2),#m3tab td:nth-child(2),
+  #m3tab th:nth-child(3),#m3tab td:nth-child(3),
+  #m3tab th:nth-child(4),#m3tab td:nth-child(4),
+  #m3tab th:nth-child(5),#m3tab td:nth-child(5),
+  #m3tab th:nth-child(6),#m3tab td:nth-child(6),
+  #m3tab th:nth-child(9),#m3tab td:nth-child(9){display:none}
+  /* no M4 a conta é do FIM: fora do modo lote as linhas têm 8 células e o
+     cabeçalho tem 9 (a 1ª é a caixa do lote, que o painel mesmo esconde);
+     no modo lote a caixa entra em cada linha e tudo desloca. Contando do
+     fim, ficam Cliente, Mensalidade e Oportunidade nos dois modos. */
+  #m4tab th:nth-last-child(1),#m4tab td:nth-last-child(1),
+  #m4tab th:nth-last-child(2),#m4tab td:nth-last-child(2),
+  #m4tab th:nth-last-child(3),#m4tab td:nth-last-child(3),
+  #m4tab th:nth-last-child(4),#m4tab td:nth-last-child(4),
+  #m4tab th:nth-last-child(6),#m4tab td:nth-last-child(6){display:none}
+  #m1tab td:last-child{max-width:none}
+  #m4tab .badge{white-space:normal;line-height:1.3}
+  #m4tab th,#m4tab td{padding:5px 5px}
+  th{white-space:normal}
   .dre-inputs input{width:110px}
   #ovl{padding:12px 8px 44px}
   #pop{width:min(370px,calc(100vw - 20px))}
