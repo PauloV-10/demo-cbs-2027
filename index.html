@@ -466,7 +466,14 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   #m4tab th,#m4tab td{padding:5px 5px}
   th{white-space:normal}
   .dre-inputs input{width:110px}
-  #ovl{padding:12px 8px 44px}
+  #ovl{padding:8px 6px 44px}
+  /* detalhes (modais) compactos; as colunas secundárias saem por JS,
+     pelo título do cabeçalho (ver o script "enxugaModal" no fim do corpo) */
+  #modal table{font-size:11.5px}
+  #modal th,#modal td{padding:5px 6px}
+  #modal .mh{padding:10px 14px}
+  #modal .mh b{font-size:13.5px}
+  #modal .badge{white-space:normal;line-height:1.3}
   #pop{width:min(370px,calc(100vw - 20px))}
   /* o Google Charts desenha com 400px fixos enquanto a aba está oculta, e
      esse gráfico alargava o viewport de layout do celular (390 virava 436),
@@ -1060,6 +1067,48 @@ window.addEventListener('message', function (ev) {
 <div id="ovl"><div id="modal">
   <div class="mh"><b id="mTit"></b><span id="mX">✕</span></div>
   <div class="mb" id="mCorpo"></div>
+<script>
+/* Em tela de celular as tabelas dos detalhes (modais) escondem as colunas
+   secundárias pelo TÍTULO do cabeçalho, porque sete funções diferentes
+   montam tabelas no mesmo contêiner e o CSS não distingue uma da outra.
+   O conteúdo completo continua no desktop e nos PDFs. Ordenar uma coluna
+   recria a tabela inteira, por isso o observador refaz o corte a cada
+   render. Linha com contagem de células diferente do cabeçalho (colspan)
+   fica como está, por segurança. */
+(function () {
+  var EXATAS = ['Categoria', 'Regime', 'Plano', 'Crédito R$/ano',
+                'Receita R$/mês', 'Gravado em', 'De'];
+  var PREFIXOS = ['PIS/COFINS hoje', 'CBS 2027 ('];
+  var corpo = document.getElementById('mCorpo');
+  if (!corpo) return;
+  function secundaria(txt) {
+    if (EXATAS.indexOf(txt) >= 0) return true;
+    for (var i = 0; i < PREFIXOS.length; i++)
+      if (txt.indexOf(PREFIXOS[i]) === 0) return true;
+    return false;
+  }
+  function enxuga() {
+    if (!window.matchMedia('(max-width:760px)').matches) return;
+    corpo.querySelectorAll('table').forEach(function (t) {
+      var ths = t.querySelectorAll('thead th');
+      var ocultar = [];
+      ths.forEach(function (th, i) {
+        var txt = th.textContent.replace(/[\u25b2\u25bc]/g, '').trim();
+        if (secundaria(txt)) ocultar.push(i);
+      });
+      if (!ocultar.length) return;
+      t.querySelectorAll('tr').forEach(function (tr) {
+        var cels = tr.children;
+        if (cels.length !== ths.length) return;
+        ocultar.forEach(function (i) { cels[i].style.display = 'none'; });
+      });
+    });
+  }
+  new MutationObserver(enxuga).observe(corpo, { childList: true });
+  enxuga();
+})();
+</script>
+
 </div></div>
 <div id="pop"><div class="ph"><div id="popTit"></div><span id="popX">✕</span></div>
   <div class="pb" id="popCorpo"></div></div>
